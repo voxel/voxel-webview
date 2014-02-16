@@ -10,6 +10,15 @@ function WebviewPlugin(game, opts)
 {
   this.game = game;
 
+  this.url = opts.url || 'http://npmjs.org/';
+  //this.url = opts.url || 'http://learningthreejs.com/'; // hits illegal return in embedded video player??
+  //this.url = opts.url || 'https://news.ycombinator.com/'; // refuses to display since X-Frame-Options: DENY
+  //this.url = opts.url || 'http://voxeljs.com/'; // also has embedded youtube video player
+
+  this.planeWidth = opts.planeWidth || 10;
+  this.planeHeight = opts.planeHeight || 10;
+  this.elementWidth = opts.elementWidth || 1024;
+
   this.enable();
 }
 
@@ -21,11 +30,9 @@ WebviewPlugin.prototype.enable = function() {
   // see http://learningthreejs.com/blog/2013/04/30/closing-the-gap-between-html-and-webgl/
   // and https://github.com/stemkoski/stemkoski.github.com/blob/master/Three.js/CSS3D.html
   var planeMaterial = new THREE.MeshBasicMaterial({color: 0x000000, opacity: 0.1, side: THREE.DoubleSide});
-  var planeWidth = 10;
-  var planeHeight = 10;
-  var planeGeometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+  var planeGeometry = new THREE.PlaneGeometry(this.planeWidth, this.planeHeight);
   var planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
-  planeMesh.position.y += planeHeight / 2;
+  planeMesh.position.y += this.planeHeight / 2;
 
   // add to the WebGL scene
   this.game.scene.add(planeMesh);
@@ -34,22 +41,18 @@ WebviewPlugin.prototype.enable = function() {
   var sceneCSS = new THREE.Scene();
 
   var element = document.createElement('iframe');
-  //element.src = 'http://learningthreejs.com/'; // hits illegal return in embedded video player??
-  //element.src = 'https://news.ycombinator.com/'; // refuses to display since X-Frame-Options: DENY
-  //element.src = 'http://voxeljs.com/'; // also has embedded youtube video player
-  element.src = 'http://npmjs.org/';
-  var elementWidth = 1024;
-  var aspectRatio = planeHeight / planeWidth;
-  var elementHeight = elementWidth * aspectRatio;
-  element.style.width = elementWidth + 'px';
+  element.src = this.url;
+  var aspectRatio = this.planeHeight / this.planeWidth;
+  var elementHeight = this.elementWidth * aspectRatio;
+  element.style.width = this.elementWidth + 'px';
   element.style.height = elementHeight + 'px';
 
   var cssObject = new THREE.CSS3DObject(element);
   cssObject.position = planeMesh.position;
   cssObject.rotation = planeMesh.rotation;
   var percentBorder = 0.05;
-  cssObject.scale.x /= (1 + percentBorder) * (elementWidth / planeWidth);
-  cssObject.scale.y /= (1 + percentBorder) * (elementWidth / planeWidth);
+  cssObject.scale.x /= (1 + percentBorder) * (this.elementWidth / this.planeWidth);
+  cssObject.scale.y /= (1 + percentBorder) * (this.elementWidth / this.planeWidth);
   sceneCSS.add(cssObject);
 
   var rendererCSS = new THREE.CSS3DRenderer();
