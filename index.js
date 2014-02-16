@@ -29,7 +29,6 @@ WebviewPlugin.prototype.enable = function() {
 
   // add to the WebGL scene
   this.game.scene.add(planeMesh);
-  return;
 
   // create a new scene to hold CSS
   var sceneCSS = new THREE.Scene();
@@ -59,9 +58,10 @@ WebviewPlugin.prototype.enable = function() {
   document.body.appendChild(rendererCSS.domElement);
   //THREEx.WindowResize(rendererCSS, camera);
 
-  // make sure the WebGL renderer appears on top of the CSS renderer
+  // make sure the CSS renderer appears below the WebGL renderer
   var rendererWebGL = this.game.view.renderer;
-  rendererWebGL.domElement.style.zIndex = 1;
+  rendererCSS.domElement.style.zIndex = -1;
+  return;
   rendererCSS.domElement.appendChild(this.game.view.renderer.domElement);
   console.log('rendererCSS',rendererCSS);
 
