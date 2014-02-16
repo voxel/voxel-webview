@@ -1,3 +1,6 @@
+'use strict';
+
+var loadCSS3DRenderer = require('./CSS3DRenderer.js');
 
 module.exports = function(game, opts) {
   return new WebviewPlugin(game, opts);
@@ -12,6 +15,8 @@ function WebviewPlugin(game, opts)
 
 WebviewPlugin.prototype.enable = function() {
   var THREE = this.game.THREE;
+
+  loadCSS3DRenderer(THREE); // adds CSS3DObject, CSS3DSprite, CSS3DRenderer to THREE
 
   // see http://learningthreejs.com/blog/2013/04/30/closing-the-gap-between-html-and-webgl/
   // and https://github.com/stemkoski/stemkoski.github.com/blob/master/Three.js/CSS3D.html

@@ -1,3 +1,7 @@
+// based on https://github.com/mrdoob/three.js/blob/219c07680da08c5254c1b05482eb40ea038234e0/examples/js/renderers/CSS3DRenderer.js
+// adapted for nodejs
+module.exports = function(THREE) {
+
 /**
  * Based on http://www.emagix.net/academic/mscs-project/item/camera-sync-with-css3-and-webgl-threejs
  * @author mrdoob / http://mrdoob.com/
@@ -221,5 +225,7 @@ THREE.CSS3DRenderer = function () {
 		renderObject( scene, camera );
 
 	};
+
+};
 
 };
