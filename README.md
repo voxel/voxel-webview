@@ -1,0 +1,6 @@
+# voxel-webview
+
+## License
+
+MIT
+
