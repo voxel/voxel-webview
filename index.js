@@ -34,7 +34,10 @@ WebviewPlugin.prototype.enable = function() {
   var sceneCSS = new THREE.Scene();
 
   var element = document.createElement('iframe');
-  element.src = 'http://learningthreejs.com/';
+  //element.src = 'http://learningthreejs.com/'; // hits illegal return in embedded video player??
+  //element.src = 'https://news.ycombinator.com/'; // refuses to display since X-Frame-Options: DENY
+  //element.src = 'http://voxeljs.com/'; // also has embedded youtube video player
+  element.src = 'http://npmjs.org/';
   var elementWidth = 1024;
   var aspectRatio = planeHeight / planeWidth;
   var elementHeight = elementWidth * aspectRatio;
@@ -61,19 +64,22 @@ WebviewPlugin.prototype.enable = function() {
   // make sure the CSS renderer appears below the WebGL renderer
   var rendererWebGL = this.game.view.renderer;
   rendererCSS.domElement.style.zIndex = -1;
-  return;
-  rendererCSS.domElement.appendChild(this.game.view.renderer.domElement);
+  //rendererCSS.domElement.appendChild(this.game.view.renderer.domElement);
   console.log('rendererCSS',rendererCSS);
 
   var sceneWebGL = this.game.scene;
   var camera = this.game.view.camera;
 
-  var render = function() {
+  var renderWebGL = this.game.view.render.bind(this.game.view);
+  this.game.view.render = function(sceneWebGL) {
     rendererCSS.render(sceneCSS, camera);
-    rendererWebGL.render(sceneWebGL, camera);
-  }; // TODO
+    //rendererWebGL.render(sceneWebGL, camera);
+    renderWebGL(sceneWebGL);
+  };
+  this.originalRender = renderWebGL;
 };
 
 WebviewPlugin.prototype.disable = function() {
+  this.game.view.render = this.originalRender;
 };
 
