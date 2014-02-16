@@ -21,14 +21,15 @@ WebviewPlugin.prototype.enable = function() {
   // see http://learningthreejs.com/blog/2013/04/30/closing-the-gap-between-html-and-webgl/
   // and https://github.com/stemkoski/stemkoski.github.com/blob/master/Three.js/CSS3D.html
   var planeMaterial = new THREE.MeshBasicMaterial({color: 0x000000, opacity: 0.1, side: THREE.DoubleSide});
-  var planeWidth = 360;
-  var planeHeight = 120;
+  var planeWidth = 10;
+  var planeHeight = 10;
   var planeGeometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
   var planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
   planeMesh.position.y += planeHeight / 2;
 
   // add to the WebGL scene
   this.game.scene.add(planeMesh);
+  return;
 
   // create a new scene to hold CSS
   var sceneCSS = new THREE.Scene();
@@ -47,7 +48,7 @@ WebviewPlugin.prototype.enable = function() {
   var percentBorder = 0.05;
   cssObject.scale.x /= (1 + percentBorder) * (elementWidth / planeWidth);
   cssObject.scale.y /= (1 + percentBorder) * (elementWidth / planeWidth);
-  cssScene.add(cssObject);
+  sceneCSS.add(cssObject);
 
   var rendererCSS = new THREE.CSS3DRenderer();
   rendererCSS.setSize(window.innerWidth, window.innerHeight);
@@ -59,10 +60,18 @@ WebviewPlugin.prototype.enable = function() {
   //THREEx.WindowResize(rendererCSS, camera);
 
   // make sure the WebGL renderer appears on top of the CSS renderer
-  this.game.view.renderer.domElement.style.zIndex = 1;
+  var rendererWebGL = this.game.view.renderer;
+  rendererWebGL.domElement.style.zIndex = 1;
   rendererCSS.domElement.appendChild(this.game.view.renderer.domElement);
-
   console.log('rendererCSS',rendererCSS);
+
+  var sceneWebGL = this.game.scene;
+  var camera = this.game.view.camera;
+
+  var render = function() {
+    rendererCSS.render(sceneCSS, camera);
+    rendererWebGL.render(sceneWebGL, camera);
+  }; // TODO
 };
 
 WebviewPlugin.prototype.disable = function() {
