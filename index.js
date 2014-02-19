@@ -41,6 +41,7 @@ WebviewPlugin.prototype.enable = function() {
   var sceneCSS = new THREE.Scene();
 
   var element = document.createElement('iframe');
+  element.setAttribute('id', 'voxel-webview');
   element.src = this.url;
   var aspectRatio = this.planeHeight / this.planeWidth;
   var elementHeight = this.elementWidth * aspectRatio;
