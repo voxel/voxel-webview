@@ -81,9 +81,24 @@ WebviewPlugin.prototype.enable = function() {
     renderWebGL(sceneWebGL);
   };
   this.originalRender = renderWebGL;
+
+  var self = this;
+
+  window.addEventListener('click', this.onClick = function(ev) {
+    // click anywhere outside of iframe to exit TODO: what if it fills the entire screen? (alternate escape hatch)
+    // (we won't receive click events for the iframe here)
+    // TODO: register on WebGL canvas element instead?
+    //  tried this.game.view.renderer.domElement but didn't receive events
+    
+    if (document.getElementById('voxel-webview').parentElement.parentElement.style.zIndex === '0') {
+      document.getElementById('voxel-webview').parentElement.parentElement.style.zIndex = '-1';
+      self.game.interact.request();
+    }
+  });
 };
 
 WebviewPlugin.prototype.disable = function() {
   this.game.view.render = this.originalRender;
+  window.removeEventListener('click', this.onClick);
 };
 
