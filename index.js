@@ -108,6 +108,14 @@ WebviewPlugin.prototype.enable = function() {
   if (commands) {
     commands.registerCommand('url',
         this.onURL = function(address) {
+          if (!address || address.length === 0) {
+            address = window.location.origin; // load self
+          }
+
+          if (address.indexOf('://') === -1) {
+            address = 'http://' + address; // so example.com doesn't load relative path
+          }
+
           document.getElementById('voxel-webview').src = address; // TODO: set url through .url setter?
         },
         'address',
@@ -115,7 +123,7 @@ WebviewPlugin.prototype.enable = function() {
 
     commands.registerCommand('web',
         this.onWeb = function() {
-          z = document.getElementById('voxel-webview').parentElement.parentElement.style.zIndex;
+          var z = document.getElementById('voxel-webview').parentElement.parentElement.style.zIndex;
           document.getElementById('voxel-webview').parentElement.parentElement.style.zIndex = {'-1':0, 0:-1}[z];
         },
         '',
