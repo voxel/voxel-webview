@@ -6,6 +6,10 @@ module.exports = function(game, opts) {
   return new WebviewPlugin(game, opts);
 };
 
+module.exports.pluginInfo = {
+  loadAfter: ['voxel-commands']
+};
+
 function WebviewPlugin(game, opts)
 {
   this.game = game;
@@ -95,10 +99,35 @@ WebviewPlugin.prototype.enable = function() {
       self.game.interact.request();
     }
   });
+
+  // commands for interacting TODO: replace with something in-game (survival), https://github.com/deathcap/voxel-webview/issues/3
+  var commands = this.game.plugins.get('voxel-commands');
+  if (commands) {
+    commands.registerCommand('url',
+        this.onURL = function(address) {
+          document.getElementById('voxel-webview').src = address; // TODO: set url through .url setter?
+        },
+        'address',
+        'loads URL into webview');
+
+    commands.registerCommand('web',
+        this.onWeb = function() {
+          z = document.getElementById('voxel-webview').parentElement.parentElement.style.zIndex;
+          document.getElementById('voxel-webview').parentElement.parentElement.style.zIndex = {'-1':0, 0:-1}[z];
+        },
+        '',
+        'interact with a webview');
+  }
 };
 
 WebviewPlugin.prototype.disable = function() {
   this.game.view.render = this.originalRender;
   window.removeEventListener('click', this.onClick);
+
+  var commands = this.game.plugins.get('voxel-commands');
+  if (commands) {
+    commands.unregisterCommand('url', this.onURL);
+    commands.unregisterCommand('web', this.onWeb);
+  }
 };
 
