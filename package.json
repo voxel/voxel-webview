@@ -2,14 +2,17 @@
   "name": "voxel-webview",
   "description": "embed webpages in a voxel.js world using CSS 3D",
   "version": "0.1.0",
+  "main": "webview.js",
   "repository": {
     "type": "git",
     "url": "git@github.com:deathcap/voxel-webview.git"
   },
   "keywords": [
-    "voxel"
+    "voxel",
+    "plugin",
+    "web",
+    "embedding"
   ],
   "dependencies": {},
-  "peerDependencies": {},
   "license": "MIT"
 }
