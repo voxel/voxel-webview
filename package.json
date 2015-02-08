@@ -13,6 +13,8 @@
     "web",
     "embedding"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "gl-mat4": "^1.0.3"
+  },
   "license": "MIT"
 }

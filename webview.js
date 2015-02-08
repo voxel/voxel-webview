@@ -1,6 +1,7 @@
 'use strict';
 
-var loadCSS3DRenderer = require('./CSS3DRenderer.js');
+var mat4 = require('gl-mat4');
+//var loadCSS3DRenderer = require('./CSS3DRenderer.js');
 
 module.exports = function(game, opts) {
   return new WebviewPlugin(game, opts);
@@ -57,8 +58,13 @@ WebviewPlugin.prototype.enable = function() {
   element.style.width = this.elementWidth + 'px';
   element.style.height = elementHeight + 'px';
   element.style.position = 'absolute'; // display over WebGL canvas
+  element.style.transformStyle = 'preserve-3d';
 
   this.element = element;
+  this.matrix = mat4.create();
+
+  this.updateMatrix();
+
   document.body.appendChild(element);
 
 /*
@@ -150,3 +156,27 @@ WebviewPlugin.prototype.disable = function() {
   }
 };
 
+var cssMatrix = function(m) {
+  return 'matrix3d(' +
+      m[0] + ', ' + // alas, cannot do .join on typed arrays
+      m[1] + ', ' +
+      m[2] + ', ' +
+      m[3] + ', ' +
+      m[4] + ', ' +
+      m[5] + ', ' +
+      m[6] + ', ' +
+      m[7] + ', ' +
+      m[8] + ', ' +
+      m[9] + ', ' +
+      m[10] + ', ' +
+      m[11] + ', ' +
+      m[12] + ', ' +
+      m[13] + ', ' +
+      m[14] + ', ' +
+      m[15] + ')';
+};
+
+
+WebviewPlugin.prototype.updateMatrix = function() {
+  this.element.style.transform = cssMatrix(this.matrix);
+};
