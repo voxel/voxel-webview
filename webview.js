@@ -78,7 +78,7 @@ WebviewPlugin.prototype.enable = function() {
   this.cssWorld = cssWorld;
   this.element = element;
 
-  this.updateMatrix();
+  this.updateCSSTransform();
 
   cssWorld.appendChild(element);
   document.body.appendChild(cssWorld);
@@ -181,13 +181,19 @@ WebviewPlugin.prototype.updatePerspective = function() {
   // http://www.emagix.net/academic/mscs-project/item/camera-sync-with-css3-and-webgl-threejs
   var cameraFOV = this.shader.cameraFOV;
   var screenHeight = this.game.shell.height;
-  var fovValue = 0.5 / Math.tan(cameraFOV * Math.PI / 360) * screenHeight;
-  this.cssWorld.style.perspective = fovValue + 'px';
+  this.screenWhalf = this.game.shell.width / 2;
+  this.screenHhalf = this.game.shell.height / 2;
+
+  this.fovPx = 0.5 / Math.tan(cameraFOV * Math.PI / 360) * screenHeight;
+  this.cssWorld.style.perspective = this.fovPx + 'px';
   this.cssWorld.style.perspectiveOrigin = '50% 50%';
 };
 
-WebviewPlugin.prototype.updateMatrix = function() {
-  this.element.style.transform = matrixToCSS(this.matrix);
+WebviewPlugin.prototype.updateCSSTransform = function() {
+  this.element.style.transform =
+    'translate3d(0,0,' + this.fovPx + 'px) ' +
+    matrixToCSS(this.matrix) +
+    ' translate3d(' + this.screenWhalf + 'px,' + this.screenHhalf + 'px, 0)';
 };
 
 WebviewPlugin.prototype.render = function() {
@@ -197,5 +203,5 @@ WebviewPlugin.prototype.render = function() {
   // invert world matrix
   mat4.invert(this.matrix, this.matrix);
 
-  this.updateMatrix();
+  this.updateCSSTransform();
 };
