@@ -1,6 +1,7 @@
 'use strict';
 
 var mat4 = require('gl-mat4');
+window.mat4=mat4;//debug
 //var loadCSS3DRenderer = require('./CSS3DRenderer.js');
 
 module.exports = function(game, opts) {
@@ -31,6 +32,11 @@ function WebviewPlugin(game, opts)
   this.planeWidth = opts.planeWidth || 10;
   this.planeHeight = opts.planeHeight || 10;
   this.elementWidth = opts.elementWidth || 1024;
+
+  this.element = undefined;
+  this.matrix = mat4.create();
+  this.viewMatrix = mat4.create();
+  this.modelMatrix = mat4.create();
 
   this.enable();
 }
@@ -66,7 +72,6 @@ WebviewPlugin.prototype.enable = function() {
   element.style.transformStyle = 'preserve-3d';
 
   this.element = element;
-  this.matrix = mat4.create();
 
   this.updateMatrix();
 
@@ -191,8 +196,12 @@ WebviewPlugin.prototype.updateMatrix = function() {
 };
 
 WebviewPlugin.prototype.render = function() {
-  this.camera.view(this.matrix);
-  // TODO: projection * matrix * model
+  this.camera.view(this.viewMatrix); // TODO: might as well get from shader plugin .viewMatrix
+
+  // TODO matrix = projection * view * model
+  mat4.multiply(this.matrix, mat4.create(), this.viewMatrix);
+  //mat4.multiply(this.matrix, this.shader.projectionMatrix, this.viewMatrix); // TODO
+  mat4.multiply(this.matrix, this.matrix, this.modelMatrix);
 
   this.updateMatrix();
 };
