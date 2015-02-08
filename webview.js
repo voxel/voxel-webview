@@ -9,15 +9,13 @@ module.exports = function(game, opts) {
 };
 
 module.exports.pluginInfo = {
-  loadAfter: ['voxel-commands', 'game-shell-fps-camera', 'voxel-shader']
+  loadAfter: ['voxel-commands', 'voxel-shader']
 };
 
 function WebviewPlugin(game, opts)
 {
   this.game = game;
 
-  this.camera = game.plugins.get('game-shell-fps-camera');
-  if (!this.camera) throw new Error('voxel-webview requires game-shell-fps-camera plugin');
   this.shader = game.plugins.get('voxel-shader');
   if (!this.shader) throw new Error('voxel-webview requires voxel-shader plugin');
 
@@ -196,10 +194,8 @@ WebviewPlugin.prototype.updateMatrix = function() {
 };
 
 WebviewPlugin.prototype.render = function() {
-  this.camera.view(this.viewMatrix); // TODO: might as well get from shader plugin .viewMatrix
-
   // TODO matrix = projection * view * model
-  mat4.multiply(this.matrix, mat4.create(), this.viewMatrix);
+  mat4.multiply(this.matrix, mat4.create(), this.shader.viewMatrix);
   //mat4.multiply(this.matrix, this.shader.projectionMatrix, this.viewMatrix); // TODO
   mat4.multiply(this.matrix, this.matrix, this.modelMatrix);
 
