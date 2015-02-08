@@ -14,7 +14,8 @@
     "embedding"
   ],
   "dependencies": {
-    "gl-mat4": "^1.0.3"
+    "gl-mat4": "^1.0.3",
+    "matrix-to-css": "^1.0.4"
   },
   "license": "MIT"
 }

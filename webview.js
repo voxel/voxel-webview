@@ -1,6 +1,7 @@
 'use strict';
 
 var mat4 = require('gl-mat4');
+var matrixToCSS = require('matrix-to-css');
 window.mat4=mat4;//debug
 //var loadCSS3DRenderer = require('./CSS3DRenderer.js');
 
@@ -185,29 +186,8 @@ WebviewPlugin.prototype.updatePerspective = function() {
   this.cssWorld.style.perspectiveOrigin = '50% 50%';
 };
 
-var cssMatrix = function(m) {
-  return 'matrix3d(' +
-      m[0] + ', ' + // alas, cannot do .join on typed arrays
-      m[1] + ', ' +
-      m[2] + ', ' +
-      m[3] + ', ' +
-      m[4] + ', ' +
-      m[5] + ', ' +
-      m[6] + ', ' +
-      m[7] + ', ' +
-      m[8] + ', ' +
-      m[9] + ', ' +
-      m[10] + ', ' +
-      m[11] + ', ' +
-      m[12] + ', ' +
-      m[13] + ', ' +
-      m[14] + ', ' +
-      m[15] + ')';
-};
-
-
 WebviewPlugin.prototype.updateMatrix = function() {
-  this.element.style.transform = cssMatrix(this.matrix);
+  this.element.style.transform = matrixToCSS(this.matrix);
 };
 
 WebviewPlugin.prototype.render = function() {
