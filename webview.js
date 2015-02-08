@@ -156,7 +156,7 @@ WebviewPlugin.prototype.enable = function() {
 };
 
 WebviewPlugin.prototype.disable = function() {
-  this.game.view.render = this.originalRender;
+  //this.game.view.render = this.originalRender;
   window.removeEventListener('click', this.onClick);
 
   var commands = this.game.plugins.get('voxel-commands');
@@ -196,7 +196,7 @@ WebviewPlugin.prototype.updateMatrix = function() {
 WebviewPlugin.prototype.render = function() {
   // TODO matrix = projection * view * model
   mat4.multiply(this.matrix, mat4.create(), this.shader.viewMatrix);
-  //mat4.multiply(this.matrix, this.shader.projectionMatrix, this.viewMatrix); // TODO
+  //mat4.multiply(this.matrix, this.shader.projectionMatrix, this.shader.viewMatrix); // TODO
   mat4.multiply(this.matrix, this.matrix, this.modelMatrix);
 
   this.updateMatrix();
