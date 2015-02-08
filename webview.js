@@ -69,11 +69,18 @@ WebviewPlugin.prototype.enable = function() {
   element.style.position = 'absolute'; // display over WebGL canvas
   element.style.transformStyle = 'preserve-3d';
 
+  // CSS world container (3D initialized in updatePerspective)
+  var cssWorld = document.createElement('div');
+
+  this.shader.on('updateProjectionMatrix', this.onUpdatePerspective = this.updatePerspective.bind(this));
+
+  this.cssWorld = cssWorld;
   this.element = element;
 
   this.updateMatrix();
 
-  document.body.appendChild(element);
+  cssWorld.appendChild(element);
+  document.body.appendChild(cssWorld);
 
   this.game.shell.on('gl-render', this.onRender = this.render.bind(this));
 
@@ -166,6 +173,16 @@ WebviewPlugin.prototype.disable = function() {
   }
 
   this.game.shell.removeListener('gl-render', this.onRender);
+  this.shader.removeListener('updateProjectionMatrix', this.onUpdatePerspective);
+};
+
+WebviewPlugin.prototype.updatePerspective = function() {
+  // http://www.emagix.net/academic/mscs-project/item/camera-sync-with-css3-and-webgl-threejs
+  var cameraFOV = this.shader.cameraFOV;
+  var screenHeight = this.game.shell.height;
+  var fovValue = 0.5 / Math.tan(cameraFOV * Math.PI / 360) * screenHeight;
+  this.cssWorld.style.perspective = fovValue + 'px';
+  this.cssWorld.style.perspectiveOrigin = '50% 50%';
 };
 
 var cssMatrix = function(m) {
