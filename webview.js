@@ -8,12 +8,17 @@ module.exports = function(game, opts) {
 };
 
 module.exports.pluginInfo = {
-  loadAfter: ['voxel-commands']
+  loadAfter: ['voxel-commands', 'game-shell-fps-camera', 'voxel-shader']
 };
 
 function WebviewPlugin(game, opts)
 {
   this.game = game;
+
+  this.camera = game.plugins.get('game-shell-fps-camera');
+  if (!this.camera) throw new Error('voxel-webview requires game-shell-fps-camera plugin');
+  this.shader = game.plugins.get('voxel-shader');
+  if (!this.shader) throw new Error('voxel-webview requires voxel-shader plugin');
 
   this.url = opts.url || 'http://browserify.org/';
   //this.url = opts.url || 'http://npmjs.org/'; // added X-Frame-Options: deny after security audit
@@ -66,6 +71,8 @@ WebviewPlugin.prototype.enable = function() {
   this.updateMatrix();
 
   document.body.appendChild(element);
+
+  this.game.shell.on('gl-render', this.onRender = this.render.bind(this));
 
 /*
   var cssObject = new THREE.CSS3DObject(element);
@@ -154,6 +161,8 @@ WebviewPlugin.prototype.disable = function() {
     commands.unregisterCommand('url', this.onURL);
     commands.unregisterCommand('web', this.onWeb);
   }
+
+  this.game.shell.removeListener('gl-render', this.onRender);
 };
 
 var cssMatrix = function(m) {
@@ -179,4 +188,11 @@ var cssMatrix = function(m) {
 
 WebviewPlugin.prototype.updateMatrix = function() {
   this.element.style.transform = cssMatrix(this.matrix);
+};
+
+WebviewPlugin.prototype.render = function() {
+  this.camera.view(this.matrix);
+  // TODO: projection * matrix * model
+
+  this.updateMatrix();
 };
