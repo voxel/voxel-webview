@@ -30,6 +30,7 @@ function WebviewPlugin(game, opts)
 }
 
 WebviewPlugin.prototype.enable = function() {
+  /*
   var THREE = this.game.THREE;
 
   loadCSS3DRenderer(THREE); // adds CSS3DObject, CSS3DSprite, CSS3DRenderer to THREE
@@ -46,6 +47,7 @@ WebviewPlugin.prototype.enable = function() {
 
   // create a new scene to hold CSS
   var sceneCSS = new THREE.Scene();
+*/
 
   var element = document.createElement('iframe');
   element.setAttribute('id', 'voxel-webview');
@@ -54,7 +56,12 @@ WebviewPlugin.prototype.enable = function() {
   var elementHeight = this.elementWidth * aspectRatio;
   element.style.width = this.elementWidth + 'px';
   element.style.height = elementHeight + 'px';
+  element.style.position = 'absolute'; // display over WebGL canvas
 
+  this.element = element;
+  document.body.appendChild(element);
+
+/*
   var cssObject = new THREE.CSS3DObject(element);
   cssObject.position = planeMesh.position;
   cssObject.rotation = planeMesh.rotation;
@@ -88,6 +95,7 @@ WebviewPlugin.prototype.enable = function() {
     renderWebGL(sceneWebGL);
   };
   this.originalRender = renderWebGL;
+*/
 
   var self = this;
 
