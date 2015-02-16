@@ -1,18 +1,21 @@
 'use strict';
 
-var loadCSS3DRenderer = require('./CSS3DRenderer.js');
+var createCSS3D = require('gl-css3d');
 
 module.exports = function(game, opts) {
   return new WebviewPlugin(game, opts);
 };
 
 module.exports.pluginInfo = {
-  loadAfter: ['voxel-commands']
+  loadAfter: ['voxel-commands', 'voxel-shader']
 };
 
 function WebviewPlugin(game, opts)
 {
   this.game = game;
+
+  this.shader = game.plugins.get('voxel-shader');
+  if (!this.shader) throw new Error('voxel-webview requires voxel-shader plugin');
 
   this.url = opts.url || 'http://browserify.org/';
   //this.url = opts.url || 'http://npmjs.org/'; // added X-Frame-Options: deny after security audit
@@ -22,72 +25,29 @@ function WebviewPlugin(game, opts)
   //this.url = opts.url || 'http:/aol.com/'; // fails setting aol_devil_flag Uncaught SecurityError: Blocked a frame with origin "http://www.aol.com
   //this.url = opts.url || 'http://github.com/'; // also has X-Frame-Options: deny
 
-  this.planeWidth = opts.planeWidth || 10;
-  this.planeHeight = opts.planeHeight || 10;
-  this.elementWidth = opts.elementWidth || 1024;
+  opts.planeWidth = opts.planeWidth || 10;
+  opts.planeHeight = opts.planeHeight || 10;
+  //this.elementWidth = opts.elementWidth || 1024; // TODO
+
+  var iframe = document.createElement('iframe');
+  iframe.src = this.url;
+  iframe.style.width = '100%';
+  iframe.style.height = '100%';
+  iframe.id = 'voxel-webview';
+
+  //opts.tint = opts.tint || [1,0,0,0];
+  opts.flipX = false; // for some reason
+  this.css3d = createCSS3D(iframe, opts);
 
   this.enable();
 }
 
 WebviewPlugin.prototype.enable = function() {
-  var THREE = this.game.THREE;
 
-  loadCSS3DRenderer(THREE); // adds CSS3DObject, CSS3DSprite, CSS3DRenderer to THREE
+  this.game.shell.on('gl-init', this.onInit = this.ginit.bind(this));
+  this.shader.on('updateProjectionMatrix', this.onUpdatePerspective = this.updatePerspective.bind(this));
+  this.game.shell.on('gl-render', this.onRender = this.render.bind(this));
 
-  // see http://learningthreejs.com/blog/2013/04/30/closing-the-gap-between-html-and-webgl/
-  // and https://github.com/stemkoski/stemkoski.github.com/blob/master/Three.js/CSS3D.html
-  var planeMaterial = new THREE.MeshBasicMaterial({color: 0x000000, opacity: 0.1, side: THREE.DoubleSide});
-  var planeGeometry = new THREE.PlaneGeometry(this.planeWidth, this.planeHeight);
-  var planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
-  planeMesh.position.y += this.planeHeight / 2;
-
-  // add to the WebGL scene
-  this.game.scene.add(planeMesh);
-
-  // create a new scene to hold CSS
-  var sceneCSS = new THREE.Scene();
-
-  var element = document.createElement('iframe');
-  element.setAttribute('id', 'voxel-webview');
-  element.src = this.url;
-  var aspectRatio = this.planeHeight / this.planeWidth;
-  var elementHeight = this.elementWidth * aspectRatio;
-  element.style.width = this.elementWidth + 'px';
-  element.style.height = elementHeight + 'px';
-
-  var cssObject = new THREE.CSS3DObject(element);
-  cssObject.position = planeMesh.position;
-  cssObject.rotation = planeMesh.rotation;
-  var percentBorder = 0.05;
-  cssObject.scale.x /= (1 + percentBorder) * (this.elementWidth / this.planeWidth);
-  cssObject.scale.y /= (1 + percentBorder) * (this.elementWidth / this.planeWidth);
-  sceneCSS.add(cssObject);
-
-  var rendererCSS = new THREE.CSS3DRenderer();
-  rendererCSS.setSize(window.innerWidth, window.innerHeight);
-  rendererCSS.domElement.style.position = 'absolute';
-  rendererCSS.domElement.style.top = '0';
-  rendererCSS.domElement.style.margin = '0';
-  rendererCSS.domElement.style.padding = '0';
-  document.body.appendChild(rendererCSS.domElement);
-  //THREEx.WindowResize(rendererCSS, camera);
-
-  // make sure the CSS renderer appears below the WebGL renderer
-  var rendererWebGL = this.game.view.renderer;
-  rendererCSS.domElement.style.zIndex = -1;
-  //rendererCSS.domElement.appendChild(this.game.view.renderer.domElement);
-  console.log('rendererCSS',rendererCSS);
-
-  var sceneWebGL = this.game.scene;
-  var camera = this.game.view.camera;
-
-  var renderWebGL = this.game.view.render.bind(this.game.view);
-  this.game.view.render = function(sceneWebGL) {
-    rendererCSS.render(sceneCSS, camera);
-    //rendererWebGL.render(sceneWebGL, camera);
-    renderWebGL(sceneWebGL);
-  };
-  this.originalRender = renderWebGL;
 
   var self = this;
 
@@ -132,7 +92,6 @@ WebviewPlugin.prototype.enable = function() {
 };
 
 WebviewPlugin.prototype.disable = function() {
-  this.game.view.render = this.originalRender;
   window.removeEventListener('click', this.onClick);
 
   var commands = this.game.plugins.get('voxel-commands');
@@ -140,5 +99,22 @@ WebviewPlugin.prototype.disable = function() {
     commands.unregisterCommand('url', this.onURL);
     commands.unregisterCommand('web', this.onWeb);
   }
+
+  this.game.shell.removeListener('gl-render', this.onRender);
+  this.game.shell.removeListener('gl-init', this.onInit);
+  this.shader.removeListener('updateProjectionMatrix', this.onUpdatePerspective);
 };
 
+WebviewPlugin.prototype.ginit = function(gl) {
+  this.css3d.ginit(this.game.shell.gl);
+};
+
+WebviewPlugin.prototype.updatePerspective = function() {
+  var cameraFOVradians = this.shader.cameraFOV * Math.PI/180;
+
+  this.css3d.updatePerspective(cameraFOVradians, this.game.shell.width, this.game.shell.height);
+};
+
+WebviewPlugin.prototype.render = function() {
+  this.css3d.render(this.shader.viewMatrix, this.shader.projectionMatrix);
+};

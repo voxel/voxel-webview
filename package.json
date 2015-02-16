@@ -13,6 +13,8 @@
     "web",
     "embedding"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "gl-css3d": "git://github.com/deathcap/gl-css3d.git"
+  },
   "license": "MIT"
 }
