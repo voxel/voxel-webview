@@ -14,7 +14,7 @@
     "embedding"
   ],
   "dependencies": {
-    "gl-css3d": "git://github.com/deathcap/gl-css3d.git"
+    "gl-css3d": "^0.1.0"
   },
   "license": "MIT"
 }
