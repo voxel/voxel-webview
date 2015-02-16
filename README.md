@@ -4,6 +4,8 @@ Embed webpages in a voxel.js world using CSS 3D
 
 ![screenshot](http://i.imgur.com/TlUZXGY.png "Screenshot")
 
+voxel-webview uses the [stackgl](http://stack.gl)-based [gl-css3d](https://github.com/deathcap/gl-css3d).
+Older 0.1.x versions used [three.js](http://threejs.org)'s [CSS3Renderer](https://github.com/mrdoob/three.js/tree/master/examples/js/renderers).
 
 ## References / see also
 
