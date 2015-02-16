@@ -10,7 +10,7 @@ module.exports = function(game, opts) {
 };
 
 module.exports.pluginInfo = {
-  loadAfter: ['voxel-commands', 'voxel-shader']
+  loadAfter: ['voxel-commands', 'voxel-shader', 'voxel-decals']
 };
 
 function WebviewPlugin(game, opts)
@@ -41,6 +41,14 @@ function WebviewPlugin(game, opts)
 }
 
 WebviewPlugin.prototype.enable = function() {
+  var decals = game.plugins.get('voxel-decals');
+  if (decals) {
+    window.d = function() {
+      decals.add({position:[-1,3,-2], normal:[0,0,1], texture:'furnace_top'});
+      decals.update();
+    };
+  }
+
   /*
   var THREE = this.game.THREE;
 
@@ -196,12 +204,10 @@ WebviewPlugin.prototype.updatePerspective = function() {
 };
 
 WebviewPlugin.prototype.updateCSSTransform = function() {
-  /* TODO
   this.element.style.transform =
-    'translate3d(0,0,' + this.fovPx + 'px) ' +
-    matrixToCSS(this.matrix) +
+    'translate3d(0,0,' + (this.fovPx - 10) + 'px) ' +
+    //matrixToCSS(this.matrix) +
     ' translate3d(' + this.screenWhalf + 'px,' + this.screenHhalf + 'px, 0)';
-  */
 };
 
 WebviewPlugin.prototype.render = function() {
