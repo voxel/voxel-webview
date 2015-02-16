@@ -14,8 +14,7 @@
     "embedding"
   ],
   "dependencies": {
-    "gl-mat4": "^1.0.3",
-    "matrix-to-css": "^1.0.4"
+    "gl-css3d": "git://github.com/deathcap/gl-css3d.git"
   },
   "license": "MIT"
 }

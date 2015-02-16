@@ -1,16 +1,13 @@
 'use strict';
 
-var mat4 = require('gl-mat4');
-var matrixToCSS = require('matrix-to-css');
-window.mat4=mat4;//debug
-//var loadCSS3DRenderer = require('./CSS3DRenderer.js');
+var createCSS3D = require('gl-css3d');
 
 module.exports = function(game, opts) {
   return new WebviewPlugin(game, opts);
 };
 
 module.exports.pluginInfo = {
-  loadAfter: ['voxel-commands', 'voxel-shader', 'voxel-decals']
+  loadAfter: ['voxel-commands', 'voxel-shader']
 };
 
 function WebviewPlugin(game, opts)
@@ -30,109 +27,25 @@ function WebviewPlugin(game, opts)
 
   this.planeWidth = opts.planeWidth || 10;
   this.planeHeight = opts.planeHeight || 10;
-  this.elementWidth = opts.elementWidth || 1024;
+  //this.elementWidth = opts.elementWidth || 1024; // TODO
 
-  this.element = undefined;
-  this.matrix = mat4.create();
-  this.viewMatrix = mat4.create();
-  this.modelMatrix = mat4.create();
+  var iframe = document.createElement('iframe');
+  iframe.src = this.url;
+  iframe.style.width = '100%';
+  iframe.style.height = '100%';
+  iframe.id = 'voxel-webview';
+
+  this.css3d = createCSS3D(iframe, opts);
 
   this.enable();
 }
 
 WebviewPlugin.prototype.enable = function() {
-  var decals = game.plugins.get('voxel-decals');
-  if (decals) {
-    window.d = function() {
-      decals.add({position:[-1,3,-2], normal:[0,0,1], texture:'furnace_top'});
-      decals.update();
-    };
-  }
 
-  /*
-  var THREE = this.game.THREE;
-
-  loadCSS3DRenderer(THREE); // adds CSS3DObject, CSS3DSprite, CSS3DRenderer to THREE
-
-  // see http://learningthreejs.com/blog/2013/04/30/closing-the-gap-between-html-and-webgl/
-  // and https://github.com/stemkoski/stemkoski.github.com/blob/master/Three.js/CSS3D.html
-  var planeMaterial = new THREE.MeshBasicMaterial({color: 0x000000, opacity: 0.1, side: THREE.DoubleSide});
-  var planeGeometry = new THREE.PlaneGeometry(this.planeWidth, this.planeHeight);
-  var planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
-  planeMesh.position.y += this.planeHeight / 2;
-
-  // add to the WebGL scene
-  this.game.scene.add(planeMesh);
-
-  // create a new scene to hold CSS
-  var sceneCSS = new THREE.Scene();
-*/
-
-  var element = document.createElement('iframe');
-  element.setAttribute('id', 'voxel-webview');
-  element.src = this.url;
-  var aspectRatio = this.planeHeight / this.planeWidth;
-  var elementHeight = this.elementWidth * aspectRatio;
-  element.style.width = this.elementWidth + 'px';
-  element.style.height = elementHeight + 'px';
-  element.style.position = 'absolute'; // display over WebGL canvas
-  element.style.transformStyle = 'preserve-3d';
-  element.style.pointerEvents = 'auto';
-
-  // CSS world container (3D initialized in updatePerspective)
-  var cssWorld = document.createElement('div');
-  //cssWorld.style.perspectiveOrigin = '50% 50%'; // already is default
-  cssWorld.style.transformStyle = 'preserve-3d';
-  cssWorld.style.overflow = 'hidden';
-  cssWorld.style.pointerEvents = 'none'; // mouse clicks through
-
+  this.game.shell.on('gl-init', this.onInit = this.ginit.bind(this));
   this.shader.on('updateProjectionMatrix', this.onUpdatePerspective = this.updatePerspective.bind(this));
-
-  this.cssWorld = cssWorld;
-  this.element = element;
-
-  this.updateCSSTransform();
-
-  cssWorld.appendChild(element);
-  document.body.appendChild(cssWorld);
-
   this.game.shell.on('gl-render', this.onRender = this.render.bind(this));
 
-/*
-  var cssObject = new THREE.CSS3DObject(element);
-  cssObject.position = planeMesh.position;
-  cssObject.rotation = planeMesh.rotation;
-  var percentBorder = 0.05;
-  cssObject.scale.x /= (1 + percentBorder) * (this.elementWidth / this.planeWidth);
-  cssObject.scale.y /= (1 + percentBorder) * (this.elementWidth / this.planeWidth);
-  sceneCSS.add(cssObject);
-
-  var rendererCSS = new THREE.CSS3DRenderer();
-  rendererCSS.setSize(window.innerWidth, window.innerHeight);
-  rendererCSS.domElement.style.position = 'absolute';
-  rendererCSS.domElement.style.top = '0';
-  rendererCSS.domElement.style.margin = '0';
-  rendererCSS.domElement.style.padding = '0';
-  document.body.appendChild(rendererCSS.domElement);
-  //THREEx.WindowResize(rendererCSS, camera);
-
-  // make sure the CSS renderer appears below the WebGL renderer
-  var rendererWebGL = this.game.view.renderer;
-  rendererCSS.domElement.style.zIndex = -1;
-  //rendererCSS.domElement.appendChild(this.game.view.renderer.domElement);
-  console.log('rendererCSS',rendererCSS);
-
-  var sceneWebGL = this.game.scene;
-  var camera = this.game.view.camera;
-
-  var renderWebGL = this.game.view.render.bind(this.game.view);
-  this.game.view.render = function(sceneWebGL) {
-    rendererCSS.render(sceneCSS, camera);
-    //rendererWebGL.render(sceneWebGL, camera);
-    renderWebGL(sceneWebGL);
-  };
-  this.originalRender = renderWebGL;
-*/
 
   var self = this;
 
@@ -177,7 +90,6 @@ WebviewPlugin.prototype.enable = function() {
 };
 
 WebviewPlugin.prototype.disable = function() {
-  //this.game.view.render = this.originalRender;
   window.removeEventListener('click', this.onClick);
 
   var commands = this.game.plugins.get('voxel-commands');
@@ -187,35 +99,20 @@ WebviewPlugin.prototype.disable = function() {
   }
 
   this.game.shell.removeListener('gl-render', this.onRender);
+  this.game.shell.removeListener('gl-init', this.onInit);
   this.shader.removeListener('updateProjectionMatrix', this.onUpdatePerspective);
 };
 
-WebviewPlugin.prototype.updatePerspective = function() {
-  // http://www.emagix.net/academic/mscs-project/item/camera-sync-with-css3-and-webgl-threejs
-  var cameraFOV = this.shader.cameraFOV=45;
-  var screenHeight = this.game.shell.height;
-  this.screenWhalf = this.game.shell.width / 2;
-  this.screenHhalf = this.game.shell.height / 2;
-
-  this.fovPx = 0.5 / Math.tan(cameraFOV * Math.PI / 360) * screenHeight;
-  this.cssWorld.style.perspective = this.fovPx + 'px';
-  this.cssWorld.style.width = this.game.shell.width + 'px';
-  this.cssWorld.style.height = this.game.shell.height + 'px';
+WebviewPlugin.prototype.ginit = function(gl) {
+  this.css3d.ginit(this.game.shell.gl);
 };
 
-WebviewPlugin.prototype.updateCSSTransform = function() {
-  this.element.style.transform =
-    'translate3d(0,0,' + (this.fovPx - 10) + 'px) ' +
-    //matrixToCSS(this.matrix) +
-    ' translate3d(' + this.screenWhalf + 'px,' + this.screenHhalf + 'px, 0)';
+WebviewPlugin.prototype.updatePerspective = function() {
+  var cameraFOVradians = this.shader.cameraFOV * Math.PI/180;
+
+  this.css3d.updatePerspective(cameraFOVradians, this.game.shell.width, this.game.shell.height);
 };
 
 WebviewPlugin.prototype.render = function() {
-  // matrix = projection * view * model
-  mat4.multiply(this.matrix, this.shader.projectionMatrix, this.shader.viewMatrix);
-  mat4.multiply(this.matrix, this.matrix, this.modelMatrix);
-  // invert world matrix
-  mat4.invert(this.matrix, this.matrix);
-
-  this.updateCSSTransform();
+  this.css3d.render(this.shader.viewMatrix, this.shader.projectionMatrix);
 };
