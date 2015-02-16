@@ -25,8 +25,8 @@ function WebviewPlugin(game, opts)
   //this.url = opts.url || 'http:/aol.com/'; // fails setting aol_devil_flag Uncaught SecurityError: Blocked a frame with origin "http://www.aol.com
   //this.url = opts.url || 'http://github.com/'; // also has X-Frame-Options: deny
 
-  this.planeWidth = opts.planeWidth || 10;
-  this.planeHeight = opts.planeHeight || 10;
+  opts.planeWidth = opts.planeWidth || 10;
+  opts.planeHeight = opts.planeHeight || 10;
   //this.elementWidth = opts.elementWidth || 1024; // TODO
 
   var iframe = document.createElement('iframe');
@@ -35,6 +35,8 @@ function WebviewPlugin(game, opts)
   iframe.style.height = '100%';
   iframe.id = 'voxel-webview';
 
+  //opts.tint = opts.tint || [1,0,0,0];
+  opts.flipX = false; // for some reason
   this.css3d = createCSS3D(iframe, opts);
 
   this.enable();
