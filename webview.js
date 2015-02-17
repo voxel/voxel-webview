@@ -62,7 +62,6 @@ WebviewPlugin.prototype.enable = function() {
     
     if (document.getElementById('voxel-webview').parentElement.parentElement.style.zIndex === '0') {
       document.getElementById('voxel-webview').parentElement.parentElement.style.zIndex = '-1';
-      self.game.interact.request();
     }
   });
 
@@ -86,6 +85,9 @@ WebviewPlugin.prototype.enable = function() {
 
     commands.registerCommand('web',
         this.onWeb = function() {
+          // bring to foreground
+          // TODO: alternatively could toggle pointer-events, see https://github.com/deathcap/voxel-webview/issues/1#issuecomment-74467436
+          // but raising the z-index unobscures the page for easier user interaction
           var z = document.getElementById('voxel-webview').parentElement.parentElement.style.zIndex;
           document.getElementById('voxel-webview').parentElement.parentElement.style.zIndex = {'-1':0, 0:-1}[z];
         },
