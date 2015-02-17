@@ -44,7 +44,15 @@ function WebviewPlugin(game, opts)
 
 WebviewPlugin.prototype.enable = function() {
 
-  this.game.shell.on('gl-init', this.onInit = this.ginit.bind(this));
+  if (this.game.shell.gl) {
+    // gl is already initialized - we won't receive gl-init, or the first gl-resize
+    // call it here (on-demand plugin loading) TODO: cleaner generic fix for plugins receiving init events too late
+    this.ginit();
+    this.updatePerspective();
+  } else {
+    this.game.shell.on('gl-init', this.onInit = this.ginit.bind(this));
+  }
+
   this.shader.on('updateProjectionMatrix', this.onUpdatePerspective = this.updatePerspective.bind(this));
   this.game.shell.on('gl-render', this.onRender = this.render.bind(this));
 
@@ -101,7 +109,7 @@ WebviewPlugin.prototype.disable = function() {
   }
 
   this.game.shell.removeListener('gl-render', this.onRender);
-  this.game.shell.removeListener('gl-init', this.onInit);
+  if (this.onInit) this.game.shell.removeListener('gl-init', this.onInit);
   this.shader.removeListener('updateProjectionMatrix', this.onUpdatePerspective);
 };
 
