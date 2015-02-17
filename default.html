@@ -1,0 +1,37 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>voxel-webview</title>
+<meta charset="utf-8">
+</head>
+<body style="background-color: lightgray">
+<h1>voxel-webview loaded!</h1>
+<p>Type <tt>.url</tt> to change load another page, or <tt>.web</tt> to interact.
+
+<p>Some websites to try:
+<br><small>(note that some popular websites disable framing and 
+cannot be browsed here)</small>
+
+<p><ul>
+<li><a href="http://browserify.org">browserify.org</a>
+<li><a href="http://stack.gl">stack.gl</a>
+<li><a href="https://www.youtube.com/embed/8gM3xMObEz4">youtube.com (embedded video)</a> <!-- see http://apiblog.youtube.com/2010/07/new-way-to-embed-youtube-videos.html -->
+<li><a href="http://voxelmetaverse.com">voxelmetaverse.com</a>
+<li><a href="https://duckduckgo.com">duckduckgo.com</a>
+
+<!-- 
+  //this.url = opts.url || 'http://browserify.org/';
+  //this.url = opts.url || 'http://npmjs.org/'; // added X-Frame-Options: deny after security audit
+  //this.url = opts.url || 'http://learningthreejs.com/'; // hits illegal return in embedded video player??
+  //this.url = opts.url || 'https://news.ycombinator.com/'; // refuses to display since X-Frame-Options: DENY
+  //this.url = opts.url || 'http://voxeljs.com/'; // also has embedded youtube video player
+  //this.url = opts.url || 'http:/aol.com/'; // fails setting aol_devil_flag Uncaught SecurityError: Blocked a frame with origin "http://www.aol.com
+  //this.url = opts.url || 'http://github.com/'; // also has X-Frame-Options: deny
+  https://www.youtube.com // X-Frame-Options SAMEORIGIN
+  https://www.google.com // X-Frame-Options: SAMEORIGIN
+  https://www.yahoo.com X-Frame-Options: DENY
+-->
+
+</p>
+</body>
+</html>

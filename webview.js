@@ -1,6 +1,7 @@
 'use strict';
 
 var createCSS3D = require('gl-css3d');
+var fs = require('fs');
 
 module.exports = function(game, opts) {
   return new WebviewPlugin(game, opts);
@@ -17,13 +18,7 @@ function WebviewPlugin(game, opts)
   this.shader = game.plugins.get('voxel-shader');
   if (!this.shader) throw new Error('voxel-webview requires voxel-shader plugin');
 
-  this.url = opts.url || 'http://browserify.org/';
-  //this.url = opts.url || 'http://npmjs.org/'; // added X-Frame-Options: deny after security audit
-  //this.url = opts.url || 'http://learningthreejs.com/'; // hits illegal return in embedded video player??
-  //this.url = opts.url || 'https://news.ycombinator.com/'; // refuses to display since X-Frame-Options: DENY
-  //this.url = opts.url || 'http://voxeljs.com/'; // also has embedded youtube video player
-  //this.url = opts.url || 'http:/aol.com/'; // fails setting aol_devil_flag Uncaught SecurityError: Blocked a frame with origin "http://www.aol.com
-  //this.url = opts.url || 'http://github.com/'; // also has X-Frame-Options: deny
+  this.url = opts.url || 'data:text/html,' + fs.readFileSync(__dirname + '/default.html');
 
   opts.planeWidth = opts.planeWidth || 10;
   opts.planeHeight = opts.planeHeight || 10;
