@@ -15,7 +15,7 @@
   ],
   "dependencies": {
     "brfs": "^1.4.1",
-    "gl-css3d": "^1.0.0"
+    "gl-css3d": "^1.0.1"
   },
   "browserify": {
     "transform": [
