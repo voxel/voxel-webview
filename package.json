@@ -1,7 +1,7 @@
 {
   "name": "voxel-webview",
   "description": "embed webpages in a voxel.js world using CSS 3D",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "main": "webview.js",
   "repository": {
     "type": "git",
